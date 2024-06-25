@@ -37,27 +37,27 @@ namespace  {
          AU.addPreserved<ScalarEvolutionWrapperPass>();
          AU.addRequired<LoopInfoWrapperPass>();
        }
-      
+
        bool SearchAlgorithm(Instruction* I ,LoopInfo &LI, Instruction* &Phi, SmallVector<Instruction*,10> &Loads, SmallVector<Instruction*,20> &Instrs, SmallVector<Instruction*,10> &Phis);
        bool InjectPrefeches(Instruction* curLoad, LoopInfo &LI, SmallVector<llvm::Instruction*, 10> &CapturedPhis, SmallVector<llvm::Instruction*, 10> &CapturedLoads, SmallVector<Instruction*,20> &CapturedInstrs, int64_t prefetchDist, bool ItIsIndirectLoad);
        bool InjectPrefechesOnePhiPartOne(Instruction* curLoad, LoopInfo &LI, SmallVector<llvm::Instruction*, 10> &CapturedPhis, SmallVector<llvm::Instruction*, 10> &CapturedLoads, SmallVector<Instruction*,20> &CapturedInstrs, int64_t prefetchDist, bool ItIsIndirectLoad);
        bool InjectPrefechesOnePhiPartTwo(Instruction* I, LoopInfo &LI,Instruction* Phi, SmallVector<Instruction*,20> &DepInstrs, int64_t prefetchDist);
        CmpInst* getCompareInstrADD(Loop* L, Instruction* nextInd);
        CmpInst* getCompareInstrGetElememntPtr(Loop* L, Instruction* nextInd);
-       PHINode* getCanonicalishInductionVariable(Loop* L);  
+       PHINode* getCanonicalishInductionVariable(Loop* L);
        bool CheckLoopCond(Loop* L);
        Instruction* GetIncomingValue(Loop* L, llvm::Instruction* curPN);
        ConstantInt* getValueAddedToIndVar(Loop* L, Instruction* nextInd);
-       ConstantInt* getValueAddedToIndVarInLoopIterxxx(Loop* L); 
+       ConstantInt* getValueAddedToIndVarInLoopIterxxx(Loop* L);
        Value* getLoopEndCondxxx(Loop* L);
-       bool IsDep(Instruction* I ,LoopInfo &LI, Instruction* &Phi,SmallVector<Instruction*,10> &DependentLoads,SmallVector<Instruction*,20> &DependentInstrs, SmallVector<Instruction*,10> &DPhis); 
+       bool IsDep(Instruction* I ,LoopInfo &LI, Instruction* &Phi,SmallVector<Instruction*,10> &DependentLoads,SmallVector<Instruction*,20> &DependentInstrs, SmallVector<Instruction*,10> &DPhis);
       public:
         static char ID;
         SWPrefetchingLLVMPass() : FunctionPass(ID) {}
         Module *M = 0;
        private:
          std::unique_ptr<llvm::sampleprof::SampleProfileReader> Reader;
-    
+
     };//struct
 
     using Hints = SampleRecord::CallTargetMap;
@@ -83,7 +83,7 @@ bool SWPrefetchingLLVMPass::doInitialization(Module &M) {
       errs()<<"PrefetchFile is Empty!\n";
       return false;
   }
-  
+
   LLVMContext &Ctx = M.getContext();
   ErrorOr<std::unique_ptr<SampleProfileReader>> ReaderOrErr = SampleProfileReader::create(PrefetchFile, Ctx);
   if (std::error_code EC = ReaderOrErr.getError()) {
@@ -97,7 +97,7 @@ bool SWPrefetchingLLVMPass::doInitialization(Module &M) {
 
   for(auto &F : M) {
     const llvm::sampleprof::FunctionSamples* SamplesReaded = Reader->getSamplesFor(F);
-    if(SamplesReaded){    
+    if(SamplesReaded){
       AutoFDOMapping=true;
     }
   }
@@ -137,7 +137,7 @@ bool SWPrefetchingLLVMPass::doInitialization(Module &M) {
     }
   }
   for(size_t index=0 ; index< NeedToSearch.size(); index++){
-      Instrs.push_back(NeedToSearch[index]);  
+      Instrs.push_back(NeedToSearch[index]);
       bool temp = SearchAlgorithm(NeedToSearch[index],LI,Phi,Loads,Instrs,Phis);
       PhiFound=true;
   }
@@ -159,8 +159,8 @@ bool SWPrefetchingLLVMPass::IsDep(Instruction* I ,LoopInfo &LI, Instruction* &Ph
         DependentInstrsToCurLoad.push_back(CurOpIsPhiNode);
         Phis.push_back(CurOpIsPhiNode);
         PhiFound=true;
-      }    
-    }    
+      }
+    }
     else if(LoadInst * curOperandIsLoad = dyn_cast<LoadInst>(op->get())){
       Loop* LoadInstrLoop = LI.getLoopFor(curOperandIsLoad->getParent());
       if(LoadInstrLoop == curInstrLoop){
@@ -168,18 +168,18 @@ bool SWPrefetchingLLVMPass::IsDep(Instruction* I ,LoopInfo &LI, Instruction* &Ph
          DependentInstrsToCurLoad.push_back(curOperandIsLoad);
          if(IsDep(curOperandIsLoad,LI,Phi,DependentLoadsToCurLoad,DependentInstrsToCurLoad,Phis)){
             PhiFound=true;
-         }    
-      }    
-    }    
+         }
+      }
+    }
     else if(Instruction* OtherTypeInstr = dyn_cast<Instruction>(op->get())){
       Loop* OtherTypeInstrLoop= LI.getLoopFor(OtherTypeInstr->getParent());
       if(OtherTypeInstrLoop == curInstrLoop){
-        DependentInstrsToCurLoad.push_back(OtherTypeInstr);  
+        DependentInstrsToCurLoad.push_back(OtherTypeInstr);
       if(IsDep(OtherTypeInstr,LI,Phi,DependentLoadsToCurLoad,DependentInstrsToCurLoad,Phis)){
            PhiFound=true;
-        }    
-      }    
-    }    
+        }
+      }
+    }
   }
   return PhiFound;
 }
@@ -205,8 +205,8 @@ ConstantInt* SWPrefetchingLLVMPass::getValueAddedToIndVarInLoopIterxxx(Loop* L){
                 if(ConstantInt *constInt = dyn_cast<ConstantInt>(AddI->getOperand(1))){
                    return constInt;
                 }
-                     
-          }   
+
+          }
           if(L->makeLoopInvariant(AddI->getOperand(0),Changed)) {
                 if(ConstantInt *constInt = dyn_cast<ConstantInt>(AddI->getOperand(1))){
                   return constInt;
@@ -269,11 +269,11 @@ Value* SWPrefetchingLLVMPass::getLoopEndCondxxx(Loop* L){
      if(CI){
         if(L->makeLoopInvariant(CI->getOperand(1),Changed)) {
           return CI->getOperand(1);
-        }    
+        }
         if(L->makeLoopInvariant(CI->getOperand(0),Changed)) {
           return CI->getOperand(0);
-        }    
-     }    
+        }
+     }
   }
   return nullptr;
 }
@@ -283,7 +283,7 @@ CmpInst* SWPrefetchingLLVMPass::getCompareInstrADD(Loop* L, Instruction* nextInd
    SetVector<Instruction*> BBInsts;
    auto B = L->getExitingBlock();
    int count=0;
-   
+
    if(!B) return nullptr;
      for(Instruction &J : *B){
         Instruction* I = &J;
@@ -296,7 +296,7 @@ CmpInst* SWPrefetchingLLVMPass::getCompareInstrADD(Loop* L, Instruction* nextInd
        return CI;
      }
    }
-  
+
    return nullptr;
 }
 
@@ -305,7 +305,7 @@ CmpInst* SWPrefetchingLLVMPass::getCompareInstrGetElememntPtr(Loop* L, Instructi
    SetVector<Instruction*> BBInsts;
    auto B = L->getExitingBlock();
    int count=0;
-   
+
    if(!B) return nullptr;
    for(Instruction &J : *B){
       Instruction* I = &J;
@@ -318,7 +318,7 @@ CmpInst* SWPrefetchingLLVMPass::getCompareInstrGetElememntPtr(Loop* L, Instructi
        return CI;
      }
   }
-  
+
    return nullptr;
 }
 
@@ -337,7 +337,7 @@ bool SWPrefetchingLLVMPass::CheckLoopCond(Loop* L) {
   if (PI != pred_end(H)){
     return OKtoPrefetch;  // multiple backedges?
   }
-  
+
   if (L->contains(Incoming)) {
      if (L->contains(Backedge)){
        return OKtoPrefetch;
@@ -351,7 +351,7 @@ bool SWPrefetchingLLVMPass::CheckLoopCond(Loop* L) {
 }
 
 
-Instruction* SWPrefetchingLLVMPass::GetIncomingValue(Loop* L, llvm::Instruction* curPN) {  
+Instruction* SWPrefetchingLLVMPass::GetIncomingValue(Loop* L, llvm::Instruction* curPN) {
   BasicBlock *H = L->getHeader();
   BasicBlock *Backedge = nullptr;
   pred_iterator PI = pred_begin(H);
@@ -375,28 +375,28 @@ ConstantInt* SWPrefetchingLLVMPass::getValueAddedToIndVar(Loop* L, Instruction* 
      if(ConstantInt *constInt = dyn_cast<ConstantInt>(nextInd->getOperand(1))){
        return constInt;
      }
-  }   
+  }
   if(L->makeLoopInvariant(nextInd->getOperand(0),Changed)) {
      if(ConstantInt *constInt = dyn_cast<ConstantInt>(nextInd->getOperand(1))){
        return constInt;
      }
-   }   
+   }
    return nullptr;
 }
 
 
 bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,  SmallVector<llvm::Instruction*, 10> &CapturedPhis, SmallVector<llvm::Instruction*, 10> &CapturedLoads, SmallVector<Instruction*,20> &CapturedInstrs, int64_t prefetchDist, bool ItIsIndirectLoad){
-   
+
    Loop* IndirectLoadLoop;
    if(ItIsIndirectLoad){
-     IndirectLoad = curLoad; 
+     IndirectLoad = curLoad;
      IndirectLoads = CapturedLoads;
      IndirectInstrs = CapturedInstrs;
      IndirectPhis = CapturedPhis;
      IndirectPrefetchDist = prefetchDist;
      IndirectLoadLoop =  LI.getLoopFor(IndirectLoad->getParent());
    }
-  
+
    bool done=false;
    bool PrefetchGetElem=false;
    Instruction* phi =nullptr;
@@ -405,17 +405,17 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
 
    if(CapturedPhis.size()==1){
      phi=CapturedPhis[0];
-     ValueMap<Instruction*, Value*> Transforms; 
+     ValueMap<Instruction*, Value*> Transforms;
      IRBuilder<> Builder(curLoad);
      Loop* PhiLoop = LI.getLoopFor(phi->getParent());
-    
+
     for(auto &curDep : CapturedInstrs){
       if(Transforms.count(curDep)){
          continue;
       }
       if(curDep == phi){
         if(PhiLoop == curLoadLoop){
-         //1) figure out (ADD, MUL, GETELEMPTR) 
+         //1) figure out (ADD, MUL, GETELEMPTR)
          //2) capture all exit conditions of BB
          //3) figure out how to prefetch
           if(CheckLoopCond(PhiLoop)){
@@ -436,19 +436,19 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                  if(PhiLoop->makeLoopInvariant(compareInstr->getOperand(1),Changed)) {
                     EndCond = compareInstr->getOperand(1);
                  }//makeLoopInvariant(1)
-                 ConstantInt* UpdateInd = getValueAddedToIndVar(PhiLoop, IncInstr);  
+                 ConstantInt* UpdateInd = getValueAddedToIndVar(PhiLoop, IncInstr);
                    if(UpdateInd){
                    if(UpdateInd->isNegative()){
                      int64_t curPrefetchDist = 0-prefetchDist;
                      NewInstr =  dyn_cast<Instruction>(Builder.CreateAdd(curDep,curDep->getType()->isIntegerTy(64) ? ConstantInt::get(Type::getInt64Ty((curDep->getParent())->getContext()),curPrefetchDist) : ConstantInt::get(Type::getInt32Ty((curDep->getParent())->getContext()),curPrefetchDist)));
-  
+
                     if(EndCond!=nullptr){
                        if(EndCond->getType() != NewInstr->getType()) {
                           Instruction* cast = CastInst::CreateIntegerCast(EndCond,NewInstr->getType(),true);
                           Builder.Insert(cast);
                           Value* cmp = Builder.CreateICmp(CmpInst::ICMP_SGT,cast,NewInstr);
                           mod = dyn_cast<Instruction>(Builder.CreateSelect(cmp,cast,NewInstr));
-                       }//if(EndCond->getType() != NewInstr->getType()) 
+                       }//if(EndCond->getType() != NewInstr->getType())
                        else{
                           Value* cmp = Builder.CreateICmp(CmpInst::ICMP_SGT,EndCond,NewInstr);
                           mod = dyn_cast<Instruction>(Builder.CreateSelect(cmp,EndCond,NewInstr));
@@ -465,13 +465,13 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                            Builder.Insert(cast);
                            Value* cmp = Builder.CreateICmp(CmpInst::ICMP_SLT,cast,NewInstr);
                            mod = dyn_cast<Instruction>(Builder.CreateSelect(cmp,cast,NewInstr));
-                        }//if(EndCond->getType() != NewInstr->getType()) 
+                        }//if(EndCond->getType() != NewInstr->getType())
                         else{
                             Value* cmp = Builder.CreateICmp(CmpInst::ICMP_SLT,EndCond,NewInstr);
                             mod = dyn_cast<Instruction>(Builder.CreateSelect(cmp,EndCond,NewInstr));
                         }//else(EndCond->getType() == NewInstr->getType())
                         Transforms.insert(std::pair<Instruction*,Instruction*>(curDep,mod));
-                      }///if(EndCond!=nullptr) 
+                      }///if(EndCond!=nullptr)
                       else{
                         Transforms.insert(std::pair<Instruction*,Instruction*>(curDep,NewInstr));
                       }
@@ -487,7 +487,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                //errs()<< "   Operand#1: "<< *(dyn_cast<ConstantInt>(IncInstr->getOperand(1))) << "\n";
              }//getOperand(1)
            }//MUL
-           
+
            if(IncInstr->getOpcode() == Instruction::GetElementPtr && IncInstr->getOperand(0) == phi){
              GetElementPtrInst* NewInstr;
              Instruction* mod;
@@ -516,13 +516,13 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                    }// else if
 
                    NextPhiDependencies.push_back(compareInstr);
-                   ConstantInt* UpdateInd = getValueAddedToIndVar(PhiLoop, IncInstr);  
+                   ConstantInt* UpdateInd = getValueAddedToIndVar(PhiLoop, IncInstr);
                    //Instruction* tempInst;
                    Value* cmp;
                    for(size_t index=0 ; index<NextPhiDependencies.size() ; index++){
                         if(NextPhiDependencies[index]->getOpcode()==Instruction::GetElementPtr){
                            if((NextPhiDependencies[index]->getOperand(0)==curDep || NextPhiDependencies[index]->getOperand(1)==curDep )){
-                               NewInstr =dyn_cast<GetElementPtrInst>(Builder.CreateInBoundsGEP(curDep,curDep->getType()->isIntegerTy(64) ? ConstantInt::get(Type::getInt64Ty((curDep->getParent())->getContext()),prefetchDist): ConstantInt::get(Type::getInt32Ty((curDep->getParent())->getContext()),prefetchDist))); 
+                               NewInstr =dyn_cast<GetElementPtrInst>(Builder.CreateInBoundsGEP(curDep,curDep->getType()->isIntegerTy(64) ? ConstantInt::get(Type::getInt64Ty((curDep->getParent())->getContext()),prefetchDist): ConstantInt::get(Type::getInt32Ty((curDep->getParent())->getContext()),prefetchDist)));
                                Transforms.insert(std::pair<Instruction*,GetElementPtrInst*>(curDep,NewInstr));
                                donePrefetchingForPhi =true;
                                 PrefetchGetElem =true;
@@ -531,17 +531,17 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                     }
                 }//getCompareInstrGetElememntPtr(PhiLoop, IncInstr)
                else{
-                    NewInstr =dyn_cast<GetElementPtrInst>(Builder.CreateInBoundsGEP(phi,ConstantInt::get(Type::getInt64Ty((curDep->getParent())->getContext()),prefetchDist))); 
+                    NewInstr =dyn_cast<GetElementPtrInst>(Builder.CreateInBoundsGEP(phi,ConstantInt::get(Type::getInt64Ty((curDep->getParent())->getContext()),prefetchDist)));
                     Transforms.insert(std::pair<Instruction*,GetElementPtrInst*>(phi,NewInstr));
                     donePrefetchingForPhi =true;
                     PrefetchGetElem=true;
-  
+
                 }
              }//getOperand(1)
            }//Getelementptr
          }//if(GetIncomingValue(PhiLoop, phi))
         }//if(CheckLoopCond(PhiLoop))
-        
+
        else{
          return done;
         }
@@ -571,7 +571,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
             }
             NewInstr->insertBefore(curLoad);
             Transforms.insert(std::pair<Instruction*,Instruction*>(curDep,NewInstr));
-        }//if(phi!=curDep) 
+        }//if(phi!=curDep)
      }//for(int index=CapturedInstrs.size()-1 ; index>=0; index--)
      if(!PrefetchGetElem){
        Type *I32 = Type::getInt32Ty((curLoad->getParent())->getContext());
@@ -585,7 +585,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
           ConstantInt::get(I32 ,0),
           ConstantInt::get(I32 ,3),
           ConstantInt::get(I32 ,1)
-        };   
+        };
        CallInst* call = CallInst::Create(PrefetchFunc,ar);
        call->insertBefore(curLoad);
     }
@@ -599,7 +599,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
           ConstantInt::get(I32 ,0),
           ConstantInt::get(I32 ,3),
           ConstantInt::get(I32 ,1)
-       };   
+       };
        CallInst* call = CallInst::Create(PrefetchFunc,ar);
        call->insertBefore(curLoad);
 
@@ -614,10 +614,10 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
           SmallVector<Instruction*,10> StrideLoads;
           SmallVector<Instruction*,20> StrideInstrs;
           SmallVector<Instruction*,10> StridePhis;
-          int64_t StridePrefetchDist;         
-          if(SearchAlgorithm(curStrideLoad,LI,StridePhi,StrideLoads,StrideInstrs,StridePhis)){ 
+          int64_t StridePrefetchDist;
+          if(SearchAlgorithm(curStrideLoad,LI,StridePhi,StrideLoads,StrideInstrs,StridePhis)){
             for(size_t index=0; index< StridePhis.size(); index++){
-                StrideInstrs.push_back(StridePhis[StridePhis.size()-1 -index]); 
+                StrideInstrs.push_back(StridePhis[StridePhis.size()-1 -index]);
             }
            bool NotFoundAPhi = false;
            for(long unsigned int j=0; j< StridePhis.size(); j++){
@@ -632,7 +632,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                }//if(!(std::find(CapturedPhis.begin(),..)))
            }//for(long unsigned int j=0; j< StridePhis.size(); j++)
            if(!NotFoundAnInstr && !NotFoundAPhi){
-               ItIsStrideLoad=true; 
+               ItIsStrideLoad=true;
                StridePrefetchDist = IndirectPrefetchDist*(index+2);
            }//if(!NotFoundAnInstr && !NotFoundAPhi)
            if(ItIsStrideLoad){
@@ -640,7 +640,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                 done=true;
              }//if(InjectPrefeches(...))
            }//if(ItIsStrideLoad)
-          }//if(SearchAlgorithm)        
+          }//if(SearchAlgorithm)
         }//if(curStrideLoadLoop == curLoadLoop)
       }//for(int index=CapturedLoads.size()-1 ; index>=0; index--)
      }//if(IndirectLoads.size()>0)
@@ -651,17 +651,17 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
   else{
      if(prefetchDist > 1000){
        prefetchDist = prefetchDist/1000;
-       Loop* curPLoop; 
-       Loop* curLoop; 
+       Loop* curPLoop;
+       Loop* curLoop;
        std::vector<llvm::Instruction*> trans_new_instructions;
        std::vector<llvm::Instruction*> old_trans_new_instructions;
        std::vector<llvm::Instruction*> new_instructions;
        llvm::ValueToValueMapTy vmap;
-       ValueMap<Instruction*, Value*> Transforms; 
+       ValueMap<Instruction*, Value*> Transforms;
        Instruction* last;
        //Instruction* InsideLoopPhi;
        Instruction* cmp;
-       Instruction* x;  
+       Instruction* x;
 
 
        for(auto p: CapturedPhis){
@@ -719,16 +719,16 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                   last =new_inst;
                   insertPt = new_inst->getNextNode();
             }
-            
+
             for (auto * i : new_instructions) {
                 llvm::RemapInstruction(i, vmap, RF_NoModuleLevelChanges | RF_IgnoreMissingLocals);
                  if(dyn_cast<CmpInst>(i))
                    cmp=dyn_cast<CmpInst>(i);
             }
           }
-          
 
-          IRBuilder<> Builder(last->getNextNode()); 
+
+          IRBuilder<> Builder(last->getNextNode());
           Instruction* NewInstr;
           NewInstr = dyn_cast<Instruction>(Builder.CreateAdd(phi,phi->getType()->isIntegerTy(64) ? ConstantInt::get(Type::getInt64Ty((curLoad->getParent())->getContext()),prefetchDist) : ConstantInt::get(Type::getInt32Ty((curLoad->getParent())->getContext()),prefetchDist)));
           Transforms.insert(std::pair<Instruction*,Instruction*>(phi,NewInstr));
@@ -753,7 +753,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
           SmallVector<Instruction*,10> SPhis;
 
           if(theSLoad){
-            if(SearchAlgorithm(SLoad,LI,Sphi,SLoads,SInstrs,SPhis)){ 
+            if(SearchAlgorithm(SLoad,LI,Sphi,SLoads,SInstrs,SPhis)){
                 for(size_t index=0; index< SPhis.size(); index++){
                     SInstrs.push_back(SPhis[SPhis.size()-1 -index]);
                 }
@@ -762,7 +762,7 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
                 }
              }
           }//if(theSLoad)
-          
+
           SmallVector<Instruction*,20> InstrsToInsert;
           bool phiFound=false;
           int start_index;
@@ -951,8 +951,8 @@ bool SWPrefetchingLLVMPass::InjectPrefeches(Instruction* curLoad,  LoopInfo &LI,
 
 bool SWPrefetchingLLVMPass::InjectPrefechesOnePhiPartTwo(Instruction* I, LoopInfo &LI,Instruction*  Phi, SmallVector<Instruction*,20> &DepInstrs, int64_t prefetchDist){
   bool done =false;
-  bool nonCanonical=false; 
-  Instruction* phi =nullptr;  
+  bool nonCanonical=false;
+  Instruction* phi =nullptr;
   phi =Phi;
   ValueMap<Instruction*, Value*> Transforms;
   IRBuilder<> Builder(I);
@@ -1000,9 +1000,9 @@ bool SWPrefetchingLLVMPass::InjectPrefechesOnePhiPartTwo(Instruction* I, LoopInf
                Value* ops = OpsInstr[index].get();
                Instruction* m =dyn_cast<Instruction>(ops);
                if(!(std::find( DepInstrs.begin(),  DepInstrs.end(),m) !=  DepInstrs.end())) {
-                   if(!(dyn_cast<ConstantInt>(ops))){   
+                   if(!(dyn_cast<ConstantInt>(ops))){
                       DepInstrs.push_back(m);
-                   } 
+                   }
                }
              }
           }
@@ -1020,7 +1020,7 @@ bool SWPrefetchingLLVMPass::InjectPrefechesOnePhiPartTwo(Instruction* I, LoopInf
         if(curDep == getCanonicalishInductionVariable(curLoop)) {
           Value* EndCond = getLoopEndCondxxx(curLoop);
           Instruction* IncInstr =GetIncomingValue(curLoop, phi);
-          ConstantInt* UpdateInd = getValueAddedToIndVar(curLoop, IncInstr);     
+          ConstantInt* UpdateInd = getValueAddedToIndVar(curLoop, IncInstr);
           Instruction* mod;
           if( UpdateInd->isNegative()){
              int64_t curprefetchDist = 0-prefetchDist;
@@ -1087,7 +1087,7 @@ bool SWPrefetchingLLVMPass::InjectPrefechesOnePhiPartTwo(Instruction* I, LoopInf
         else if(Instruction* opIsInstr = dyn_cast<Instruction>(op)) {
           if(Transforms.count(opIsInstr)) {
               NewInstr->setOperand(index,Transforms.lookup(opIsInstr));
-           }//if(Transforms) 
+           }//if(Transforms)
          }//else if
         }//for
         NewInstr->insertBefore(I);
@@ -1115,12 +1115,12 @@ bool SWPrefetchingLLVMPass::InjectPrefechesOnePhiPartTwo(Instruction* I, LoopInf
 
 bool SWPrefetchingLLVMPass::InjectPrefechesOnePhiPartOne(Instruction* I, LoopInfo &LI, SmallVector<llvm::Instruction*, 10> &Phi, SmallVector<llvm::Instruction*, 10> &CapturedLoads, SmallVector<Instruction*,20> &DepInstrs, int64_t prefetchDist, bool ItIsIndirectLoad){
   bool done=false;
-  Instruction* phi =nullptr;     
+  Instruction* phi =nullptr;
   SmallVector<Instruction*,10> DependentLoadsToCurLoadx;
   SmallVector<Instruction*,20> DependentInstrsToCurLoadx;
   SmallVector<Instruction*,10> DependentPhisx;
- 
-  if(IsDep(I,LI,phi,DependentLoadsToCurLoadx,DependentInstrsToCurLoadx,DependentPhisx)){ 
+
+  if(IsDep(I,LI,phi,DependentLoadsToCurLoadx,DependentInstrsToCurLoadx,DependentPhisx)){
      Instruction * SearchPhi = nullptr;
      SmallVector<Instruction*,10> SearchLoads;
      SmallVector<Instruction*,20> SearchInstrs;
@@ -1145,15 +1145,15 @@ bool SWPrefetchingLLVMPass::InjectPrefechesOnePhiPartOne(Instruction* I, LoopInf
 bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
   bool modified = false;
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-  if(!Reader){ 
+  if(!Reader){
     return false;
   }
   bool samplesExist =false;
   const llvm::sampleprof::FunctionSamples* SamplesReaded = Reader->getSamplesFor(F);
-  if(SamplesReaded){    
+  if(SamplesReaded){
      samplesExist =true;
   }
-  /*if(!SamplesReaded){   
+  /*if(!SamplesReaded){
       errs()<<F.getName() << "   no-sample!\n";
   }*/
   if(samplesExist){
@@ -1181,17 +1181,17 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
                         SmallVector<Instruction*,10> Loads;
                         SmallVector<Instruction*,20> Instrs;
                         SmallVector<Instruction*,10> Phis;
-                        
-                        if(SearchAlgorithm(curLoad,LI,phi,Loads,Instrs,Phis)){ 
+
+                        if(SearchAlgorithm(curLoad,LI,phi,Loads,Instrs,Phis)){
                           for(size_t index=0; index< Phis.size(); index++){
-                              Instrs.push_back(Phis[Phis.size()-1 -index]); 
+                              Instrs.push_back(Phis[Phis.size()-1 -index]);
                           }
                            AllCurLoads.push_back(curLoad);
                            AllPrefetchDist.push_back(prefechDist);
                            AllCapturedInstrs.push_back(Instrs);
                            AllCapturedPhis.push_back(Phis);
                            AllCapturedLoads.push_back(Loads);
-                           
+
                         }//SearchAlgorithm
                    }//auto &S_V : *T
               }//dyn_cast<LoadInst>(&I)
@@ -1199,7 +1199,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
         }//auto &I : BB
       }//isBBLoop
     }//auto &BB : F
-    
+
     bool correctMappingCheck=false;
     SmallVector<Instruction*,10> AlreadyPrefetched;
 
@@ -1217,7 +1217,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
        }
       }
      }
-     if(correctMappingCheck){   
+     if(correctMappingCheck){
       for(long unsigned int j=0; j< AllCurLoads.size(); j++){
         if(!(std::find(correctMapping.begin(), correctMapping.end(),j) != correctMapping.end())){
           if(!(std::find(AlreadyPrefetched.begin(), AlreadyPrefetched.end(),AllCurLoads[j]) != AlreadyPrefetched.end())){
@@ -1229,7 +1229,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
             }
             else if (AllCapturedPhis[j].size()==1 && AllCapturedLoads[j].size() !=0){
                if(InjectPrefechesOnePhiPartOne(AllCurLoads[j],LI,AllCapturedPhis[j], AllCapturedLoads[j], AllCapturedInstrs[j], AllPrefetchDist[j],true)){
-                 modified=true;  
+                 modified=true;
           }
         }
        }
@@ -1247,7 +1247,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
           }
           else if (AllCapturedPhis[j].size()==1){
              if(InjectPrefechesOnePhiPartOne(AllCurLoads[j],LI,AllCapturedPhis[j], AllCapturedLoads[j], AllCapturedInstrs[j], AllPrefetchDist[j],true)){
-              modified=true;  
+              modified=true;
              }
           }
       }
@@ -1259,7 +1259,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
      int64_t pd;
      for(auto &e : LBR_dist){
        pd = std::stoull(e);
-     }   
+     }
      std::vector<SmallVector<Instruction*,20>> AllDependentInstsx;
      std::vector<SmallVector<Instruction*,10>> AllDependentPhisx;
      SmallVector<Instruction*,10> StrideLoadsx;
@@ -1285,7 +1285,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
            SmallVector<Instruction*,10> DependentLoadsToCurLoadx;
            SmallVector<Instruction*,20> DependentInstrsToCurLoadx;
            SmallVector<Instruction*,10> DependentPhisx;
-           if(IsDep(curLoad,LI,phi,DependentLoadsToCurLoadx,DependentInstrsToCurLoadx,DependentPhisx)){ 
+           if(IsDep(curLoad,LI,phi,DependentLoadsToCurLoadx,DependentInstrsToCurLoadx,DependentPhisx)){
             if(DependentLoadsToCurLoadx.size()>0){
                  int indexOfDepLoad;
                  bool DepPhiOfDepLoad=false;
@@ -1294,7 +1294,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
                       if(AllLoadsDepToPhix[i]==s){
                         DepPhiOfDepLoad =true;
                         indexOfDepLoad=i;
-                      }                                                                                                                                                  
+                      }
                     }
                     if(DepPhiOfDepLoad){
                       bool foundall=false;
@@ -1313,7 +1313,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
                          SmallVector<Instruction*,20> DependentInstrsToStrideLoadx;
                          SmallVector<Instruction*,10> DependentPhistoIndirectLoadx;
                          SmallVector<Instruction*,10> DependentPhistoStrideLoadx;
-                         
+
                          IndirectLoadsx.push_back(curLoad);
                          StrideLoadsx.push_back(s);
                          for(auto &si : DependentInstrsToCurLoadx){
@@ -1335,7 +1335,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
 
                       }
                       DepPhiOfDepLoad=false;
-                    }                                            
+                    }
 
                  }
             }//if(DependentLoadsToCurLoad.size()
@@ -1349,7 +1349,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
     }//for(auto &BB : F)
 
     for(long unsigned int x =0; x< StrideLoadsx.size(); x++){
-      for(long unsigned int y =0; y< IndirectLoadsx.size(); y++){  
+      for(long unsigned int y =0; y< IndirectLoadsx.size(); y++){
         if(StrideLoadsx[x]==IndirectLoadsx[y]){
           if( AllDependentPhisToStrideLoadx[x]==AllDependentPhisToIndirectLoadx[y]){
              LoadsToRemovex.push_back(StrideLoadsx[x]);
@@ -1383,7 +1383,7 @@ bool SWPrefetchingLLVMPass::runOnFunction(Function &F) {
     if(InjectPrefechesOnePhiPartTwo(IndirectLoadsToKeepx[x],LI,AllDependentPhisToIndirectLoadx[LoadsIndexx[x]][0], AllDependentInstrsToIndirectLoadx[LoadsIndexx[x]],pd)){
         modified=true;
      }
-     if(InjectPrefechesOnePhiPartTwo(StrideLoadsToKeepx[x],LI,AllDependentPhisToStrideLoadx[LoadsIndexx[x]][0], AllDependentInstrsToStrideLoadx[LoadsIndexx[x]],pd*2)){                                                                                                        
+     if(InjectPrefechesOnePhiPartTwo(StrideLoadsToKeepx[x],LI,AllDependentPhisToStrideLoadx[LoadsIndexx[x]][0], AllDependentInstrsToStrideLoadx[LoadsIndexx[x]],pd*2)){
         modified=true;
 
         }

@@ -1,13 +1,13 @@
 import pandas as pd
-import matplotlib.pyplot as plt 
-import seaborn as sns 
+import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import Counter
-import sys 
+import sys
 import glob
 import re
 import matplotlib.cm as cm
 import numpy as np
-import pprint 
+import pprint
 import collections
 
 
@@ -33,7 +33,7 @@ with open(sys.argv[1]) as file_in:
                     prev_count=count
                     #out.write(str(line))
                     #lines.append(line)
-                    count=count+1 
+                    count=count+1
 
                 if PC_str in branch_record:
                     if count == (prev_count+1):

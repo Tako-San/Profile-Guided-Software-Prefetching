@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import find_peaks_cwt
@@ -33,7 +33,7 @@ with open(output_file, 'wt') as out:
     for i in range(0, len(col1)):
         for x in range(0, len(col1)):
             if int(col1[x])==i:
-                out.write(str(i)+","+str(col2[x])+"\n")   
+                out.write(str(i)+","+str(col2[x])+"\n")
 
 
 

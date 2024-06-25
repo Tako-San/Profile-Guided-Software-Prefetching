@@ -1,13 +1,13 @@
 import pandas as pd
-import matplotlib.pyplot as plt 
-import seaborn as sns 
+import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import Counter
-import sys 
+import sys
 import glob
 import re
 import matplotlib.cm as cm
 import numpy as np
-import pprint 
+import pprint
 import collections
 
 

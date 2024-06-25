@@ -22,7 +22,7 @@ with open(sys.argv[1]) as file_in:
                 if(BackEnd_location ==5):
                     BackEnd_value=value
                 BackEnd_location+=1
-        if 'Backend_Bound.Memory_Bound' in line.strip(): 
+        if 'Backend_Bound.Memory_Bound' in line.strip():
              if "S0-C0-" not in line.strip():
                  for value in line.split():
                       if(BackEnd_MemEnd_location ==5):
@@ -40,7 +40,7 @@ with open(sys.argv[1]) as file_in:
                       if(DRAM_location ==5):
                           DRAM_value=value
                       DRAM_location+=1
- 
+
 
 
 output_file = open(sys.argv[2], "a")

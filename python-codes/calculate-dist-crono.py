@@ -24,10 +24,10 @@ for fname in glob.glob(sys.argv[1]):
     globals()[f"com_dist_freq_{a}"]=[]
     total=0
     for key,value in distances.most_common(100000000):
-        if (value > 0): 
+        if (value > 0):
             globals()[f"com_dist_value_{a}"].append(key)
             globals()[f"com_dist_freq_{a}"].append(value)
-            total += value   
+            total += value
 
     DataPoint1 =sys.argv[3]
     DataPoint2= sys.argv[4]
@@ -36,7 +36,7 @@ for fname in glob.glob(sys.argv[1]):
     total_freq_1=0
     total_sum_1=0
     total_avg_1=0
- 
+
     for x in range(0, len( globals()[f"com_dist_value_{a}"])):
         if(globals()[f"com_dist_value_{a}"][x]< int(DataPoint1)):
             total_sum_1+=globals()[f"com_dist_value_{a}"][x]*globals()[f"com_dist_freq_{a}"][x]
@@ -48,7 +48,7 @@ for fname in glob.glob(sys.argv[1]):
     total_freq_2=0
     total_sum_2=0
     total_avg_2=0
- 
+
     for x in range(0, len( globals()[f"com_dist_value_{a}"])):
         if(globals()[f"com_dist_value_{a}"][x]>= int(DataPoint2)):
             total_sum_2+=globals()[f"com_dist_value_{a}"][x]*globals()[f"com_dist_freq_{a}"][x]
@@ -60,7 +60,7 @@ for fname in glob.glob(sys.argv[1]):
     preftech_dist1=0
     preftech_dist2=0
 
-    
+
     output_file=str(sys.argv[5])+"-ALL-dist1.csv"
     with open(output_file, 'a') as out:
         #print("---------------------")
@@ -84,7 +84,7 @@ for fname in glob.glob(sys.argv[1]):
         a=round(prefetch_dist2)*1000
         out2.write(str(PC)+","+str(a)+",nta\n")
 
-    
+
 
 
 

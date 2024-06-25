@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import find_peaks_cwt

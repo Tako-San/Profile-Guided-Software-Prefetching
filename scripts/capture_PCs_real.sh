@@ -1,9 +1,9 @@
-#!/bin/bash 
+#!/bin/bash
 benchmark_name=$1
 g=$2
 prefetch_distance=(4 8 16 32 64)
 ####################PATHs
-benchmark_path=""                     
+benchmark_path=""
 results_path=""
 input_graphs_path=""
 python_codes_path=""
@@ -12,7 +12,7 @@ LLVM10_buildMyPasses=""
 
 echo ""
 echo "benchmark_name:   "$benchmark_name
-echo "input-graph:      "$g  
+echo "input-graph:      "$g
 echo "################################## LLC misses"
 echo "Capture deliquent load PCs ... "
 
@@ -20,7 +20,7 @@ gn=${g::-4}
 ####################LLC misses
 LLC_DIR="LLC-misses-"$benchmark_name"-INPUT-"$gn
 mkdir $LLC_DIR
-cd $LLC_DIR 
+cd $LLC_DIR
 echo ""
 echo "  1) perf record LLC misses ...."
 perf record -e cpu/event=0xd1,umask=0x20,name=MEM_LOAD_RETIRED.L3_MISS/ppp -- ./../../$benchmark_name 1 1 $input_graphs_path/$g
@@ -57,14 +57,14 @@ time perf script -F ip,brstack -i perf.data  > "dump-"$benchmark_name"-INPUT-"$g
 perf script -F ip,brstack,brstackinsn -i perf.data  > "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstackinsn.txt"
 
 while read PC; do
-  python3 $python_codes_path/first_filter_samples.py "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstackinsn.txt" $PC 
+  python3 $python_codes_path/first_filter_samples.py "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstackinsn.txt" $PC
 done <  $benchmark_name"-INPUT-"$gn"-ALL-PCList.txt"
 
 while read PC; do
-  python3 $python_codes_path/find_src_in_branches.py "first-filter-"$PC".txt" $PC 
+  python3 $python_codes_path/find_src_in_branches.py "first-filter-"$PC".txt" $PC
   while read PC_src; do
-    python3 $python_codes_path/find_dest_in_branches.py "first-filter-"$PC".txt" $PC_src $PC 
-  done < "in-branches-src-PC-"$PC".txt" 
+    python3 $python_codes_path/find_dest_in_branches.py "first-filter-"$PC".txt" $PC_src $PC
+  done < "in-branches-src-PC-"$PC".txt"
 done <  $benchmark_name"-INPUT-"$gn"-ALL-PCList.txt"
 ######
 
@@ -78,25 +78,25 @@ while read PC; do
   echo "   src: " $src
   echo "   dst: " $dst
 
-  python3 $python_codes_path/filter_samples.py "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstackinsn.txt" $PC 
-  
-  python3 $python_codes_path/temp.py "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstack.txt" "0x"$src "0x"$dst $PC 
-  
+  python3 $python_codes_path/filter_samples.py "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstackinsn.txt" $PC
+
+  python3 $python_codes_path/temp.py "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstack.txt" "0x"$src "0x"$dst $PC
+
   python3 $python_codes_path/dist-between-2-occur-outerloop.py  "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstack.txt" "0x"$src "0x"$dst $PC  python3 $python_codes_path/dist-between-2-occur-outerloop.py  "filter-"$PC".txt" "0x"$src "0x"$dst $PC
   tail -n 5000 "0x"$src"-0x"$dst"-dist-between-2-occur-outerloop-PC-"$PC".txt" > "x.txt"
-  
+
   python3 $python_codes_path/cal-avg-dist-outerloop.py "0x"$src"-0x"$dst"-dist-between-2-occur-outerloop-PC-"$PC".txt" "0x"$src "0x"$dst $PC
-  python3 $python_codes_path/cal-avg-dist-outerloop.py "x.txt" "0x"$src "0x"$dst $PC 
-  
+  python3 $python_codes_path/cal-avg-dist-outerloop.py "x.txt" "0x"$src "0x"$dst $PC
+
   val="$(sed "2q;d" "0x"$src"-0x"$dst"-avg-dist-outerloop-PC-"$PC".txt")"
   python3 $python_codes_path/inner-iters.py  "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstack.txt" "0x"$src "0x"$dst $PC
-  python3 $python_codes_path/cal-avg-inner-iters.py "0x"$src"-0x"$dst"-innet-iters-PC-"$PC".txt" "0x"$src "0x"$dst $PC  
-  python3 $python_codes_path/inner-avg-iter-time.py  "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstack.txt" "0x"$src "0x"$dst $PC 
-  python3 $python_codes_path/cal-avg-inner-iter-time.py "0x"$src"-0x"$dst"-avg-inner-iter-time-PC-"$PC".txt" "0x"$src "0x"$dst $PC  
-  python3 $python_codes_path/plot-scatter.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-new.txt" "0x"$src"-0x"$dst"-cycles-PC-"$PC"-new-plot"  
-  python3 $python_codes_path/test-plot.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-new.txt" "0x"$src"-0x"$dst"-cycles-PC-"$PC 
-  python3 $python_codes_path/sort-data.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-test-plot.csv" "0x"$src"-0x"$dst"-cycles-PC-"$PC 
-  python3 $python_codes_path/find-peaks.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-sorted-data.csv" "0x"$src"-0x"$dst"-cycles-PC-"$PC   
+  python3 $python_codes_path/cal-avg-inner-iters.py "0x"$src"-0x"$dst"-innet-iters-PC-"$PC".txt" "0x"$src "0x"$dst $PC
+  python3 $python_codes_path/inner-avg-iter-time.py  "dump-"$benchmark_name"-INPUT-"$gn"-whole-app-LBRsamples-brstack.txt" "0x"$src "0x"$dst $PC
+  python3 $python_codes_path/cal-avg-inner-iter-time.py "0x"$src"-0x"$dst"-avg-inner-iter-time-PC-"$PC".txt" "0x"$src "0x"$dst $PC
+  python3 $python_codes_path/plot-scatter.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-new.txt" "0x"$src"-0x"$dst"-cycles-PC-"$PC"-new-plot"
+  python3 $python_codes_path/test-plot.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-new.txt" "0x"$src"-0x"$dst"-cycles-PC-"$PC
+  python3 $python_codes_path/sort-data.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-test-plot.csv" "0x"$src"-0x"$dst"-cycles-PC-"$PC
+  python3 $python_codes_path/find-peaks.py "0x"$src"-0x"$dst"-cycles-PC-"$PC"-sorted-data.csv" "0x"$src"-0x"$dst"-cycles-PC-"$PC
   first_peak="$(sed "1q;d" "0x"$src"-0x"$dst"-cycles-PC-"$PC"-peaks.csv")"
   sec_peak="$(sed "2q;d" "0x"$src"-0x"$dst"-cycles-PC-"$PC"-peaks.csv")"
   three_peak="$(sed "3q;d" "0x"$src"-0x"$dst"-cycles-PC-"$PC"-peaks.csv")"
@@ -154,7 +154,7 @@ do
   $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_name"-pref-INPUT-"$gn"-dist"$dist".o" -o $benchmark_name"-pref-INPUT-"$gn"-dist"$dist -lpthread -lrt
   python3 $python_codes_path/bench_name.py ../../../../"CRONO-benchmarks-perf-stats-output.txt" $benchmark_name
   perf stat -o $benchmark_name"-pref-INPUT-"$gn"-dist"$dist"-perf-stats.out" -e L1-dcache-loads -e L1-dcache-load-misses -e L2-loads -e L2-load-misses -e LLC-loads -e LLC-load-misses -e cycles -e instructions -e SW_PREFETCH_ACCESS.T1_T2 -e SW_PREFETCH_ACCESS.T0 -e SW_PREFETCH_ACCESS.NTA -e LOAD_HIT_PRE.SW_PF -e cache-misses ./$benchmark_name"-pref-INPUT-"$gn"-dist"$dist 1 1 $input_graphs_path/$g
-  echo "" >>  $benchmark_name"-pref-INPUT-"$gn"-dist"$dist"-perf-stats.out" 
+  echo "" >>  $benchmark_name"-pref-INPUT-"$gn"-dist"$dist"-perf-stats.out"
   echo "Config: Prefetching">> $benchmark_name"-pref-INPUT-"$gn"-dist"$dist"-perf-stats.out"
   echo "    Input_graph = " $g>> $benchmark_name"-pref-INPUT-"$gn"-dist"$dist"-perf-stats.out"
   echo "    prefetch-distance = " $dist>> $benchmark_name"-pref-INPUT-"$gn"-dist"$dist"-perf-stats.out"
@@ -181,7 +181,7 @@ else
   perf stat -o $benchmark_name"-pref-INPUT-"$gn"-perf-stats.out" -e L1-dcache-loads -e L1-dcache-load-misses -e L2-loads -e L2-load-misses -e LLC-loads -e LLC-load-misses -e cycles -e instructions -e SW_PREFETCH_ACCESS.T1_T2 -e SW_PREFETCH_ACCESS.T0 -e SW_PREFETCH_ACCESS.NTA -e LOAD_HIT_PRE.SW_PF -e cache-misses ./$benchmark_name"-pref-INPUT-"$gn 1 1 $input_graphs_path/$g
 
 fi
-echo "" >>  $benchmark_name"-pref-INPUT-"$gn"-perf-stats.out" 
+echo "" >>  $benchmark_name"-pref-INPUT-"$gn"-perf-stats.out"
 echo "Config: Prefetching">> $benchmark_name"-pref-INPUT-"$gn"-perf-stats.out"
 echo "    Input_graph = " $g>> $benchmark_name"-pref-INPUT-"$gn"-perf-stats.out"
 echo "    prefetch-distance = "$dist>> $benchmark_name"-pref-INPUT-"$gn"-perf-stats.out"

@@ -26,12 +26,12 @@ for fname in glob.glob(sys.argv[1]):
     distances=Counter(globals()[f"data_{a}"]['dist'])
     globals()[f"com_dist_value_{a}"]=[]
     globals()[f"com_dist_freq_{a}"]=[]
-    
+
     for key,value in distances.most_common(100000000):
       if (value > 0):
         globals()[f"com_dist_value_{a}"].append(key)
         globals()[f"com_dist_freq_{a}"].append(value)
-      
+
 
 #print(globals()[f"com_dist_value_{a}"])
 #print(globals()[f"com_dist_freq_{a}"])

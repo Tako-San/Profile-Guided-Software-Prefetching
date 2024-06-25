@@ -1,19 +1,19 @@
 import pandas as pd
-import matplotlib.pyplot as plt 
-import seaborn as sns 
+import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import Counter
-import sys 
+import sys
 import glob
 import re
 import matplotlib.cm as cm
 import numpy as np
-import pprint 
+import pprint
 import collections
 
 pc=sys.argv[3]
 PC_src = sys.argv[2]
 #PC_str ='0000000000'+str(PC_src)
-if len(PC_src) <8: 
+if len(PC_src) <8:
     PC_str ='0000000000'+str(PC_src)
 else:
     PC_str =str(PC_src)

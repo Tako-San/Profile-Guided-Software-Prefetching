@@ -1,13 +1,13 @@
 import pandas as pd
-import matplotlib.pyplot as plt 
-import seaborn as sns 
+import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import Counter
-import sys 
+import sys
 import glob
 import re
 import matplotlib.cm as cm
 import numpy as np
-import pprint 
+import pprint
 import collections
 
 src=sys.argv[2]
@@ -29,5 +29,5 @@ with open (output_file, 'a') as out:
         sum = sum + float(lines[i])
     if len(lines) !=0:
         total_avg = sum/len(lines)
-        out.write(str(total_avg)+ "\n") 
+        out.write(str(total_avg)+ "\n")
 
