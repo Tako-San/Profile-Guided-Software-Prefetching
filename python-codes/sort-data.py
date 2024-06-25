@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import find_peaks_cwt
@@ -19,6 +19,8 @@ import sys
 
 
 estimated_data = pd.read_csv(sys.argv[1], header=None)
+# estimated_data.sort_values(0, inplace=True)
+# estimated_data.reset_index(drop=True, inplace=True)
 
 col1 = estimated_data[:][0] # First column data
 col2 = estimated_data[:][1] # Second column data
@@ -26,14 +28,15 @@ col2 = estimated_data[:][1] # Second column data
 #print("col1: ",col1)
 #print("col2: ", col2)
 
+# print(estimated_data)
 
 output_file=str(sys.argv[2])+"-sorted-data.csv"
 with open(output_file, 'wt') as out:
 #    out.write('x,y\n')
     for i in range(0, len(col1)):
+        # out.write(str(col1[i])+","+str(col2[i])+"\n")
         for x in range(0, len(col1)):
             if int(col1[x])==i:
-                out.write(str(i)+","+str(col2[x])+"\n")   
-
+                out.write(str(i)+","+str(col2[x])+"\n")
 
 

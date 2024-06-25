@@ -8,17 +8,21 @@
 ### You can get the input graphs from SNAP "http://snap.stanford.edu/data/web-Google.html"
 
 ####################PATH
-benchmark_path=""
-results_path=""
-input_graphs_path=""
-python_codes_path=""
-scripts_path=""
-LLVM10_buildMyPasses=""
+benchmark_path="/home/tako/prog/pgsp/crono/apps"
+results_path="/home/tako/prog/pgsp/apt-get/results"
+input_graphs_path="/home/tako/prog/pgsp/graphs"
+python_codes_path="/home/tako/prog/pgsp/apt-get/python-codes"
+scripts_path="/home/tako/prog/pgsp/apt-get/scripts"
+LLVM10_buildMyPasses="/home/tako/prog/pgsp/llvm-10"
+pgsp_pass_path="/home/tako/prog/pgsp/apt-get"
+AutoFDO10="/home/tako/prog/pgsp/autofdo/build"
 
 ####################INPUT
-benchmarks=(bfs dfs bc pagerank sssp)
+# benchmarks=(bfs dfs bc pagerank sssp)
+benchmarks=(bfs pagerank sssp)
 
-bfs_input_graphs=(p2p-Gnutella31.txt p2p-Gnutella30.txt loc-brightkite_edges.txt)
+# bfs_input_graphs=(p2p-Gnutella31.txt p2p-Gnutella30.txt loc-brightkite_edges.txt)
+bfs_input_graphs=()
 bfs_N=(80000 100000 90000)
 bfs_DEG=(8 16 10)
 
@@ -49,16 +53,16 @@ do
     echo "Compile bfs becnhmark ..."
     bench_dir=$benchmark_name
     mkdir $bench_dir
-    cd $bench_dir  
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name"_atomic.cc" -S -emit-llvm -o $benchmark_name".ll" 
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name"_atomic.cc" -o $benchmark_name -lpthread -lrt
+    cd $bench_dir
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name"_atomic.cc" -S -emit-llvm -o $benchmark_name".ll"
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name"_atomic.cc" -o $benchmark_name -lpthread -lrt
     cp $scripts_path/capture_PCs_real.sh .
     cp $scripts_path/capture_PCs_syn.sh .
     echo "done!"
     echo""
     for g in "${bfs_input_graphs[@]}"
     do
-      gn=${g::-4}
+      gn=${g::-4} # remove '.txt'
       res_DIR=$benchmark_name"-INPUT-"$gn
       mkdir $res_DIR
       cd $res_DIR
@@ -66,7 +70,7 @@ do
       cd ..
       ####Top_DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-"$gn
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -89,7 +93,7 @@ do
       cd ..
       ###TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-N"${bfs_N[$i]}"-DEG"${bfs_DEG[$i]}
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -111,12 +115,12 @@ do
     echo "Compile bc becnhmark ..."
     bench_dir=$benchmark_name
     mkdir $bench_dir
-    cd $bench_dir  
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name".cc" -S -emit-llvm -o $benchmark_name".ll" 
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name".cc" -o $benchmark_name -lpthread -lrt
+    cd $bench_dir
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name".cc" -S -emit-llvm -o $benchmark_name".ll"
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name".cc" -o $benchmark_name -lpthread -lrt
     cp $scripts_path/capture_PCs_real.sh .
     cp $scripts_path/capture_PCs_syn.sh .
- 
+
     echo "done!"
     echo""
     for g in "${bc_input_graphs[@]}"
@@ -129,7 +133,7 @@ do
       cd ..
       ####TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-"$gn
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -150,7 +154,7 @@ do
       cd ..
       ###TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-N"${bc_N[$i]}"-DEG"${bc_DEG[$i]}
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -171,9 +175,9 @@ do
     echo "Compile pagerank becnhmark ..."
     bench_dir=$benchmark_name
     mkdir $bench_dir
-    cd $bench_dir  
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name"_lock.cc" -S -emit-llvm -o $benchmark_name".ll" 
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name"_lock.cc" -o $benchmark_name -lpthread -lrt
+    cd $bench_dir
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name"_lock.cc" -S -emit-llvm -o $benchmark_name".ll"
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name"_lock.cc" -o $benchmark_name -lpthread -lrt
     cp $scripts_path/capture_PCs_real.sh .
     #cp $scripts_path/capture_PCs_real_prev.sh .
     cp $scripts_path/capture_PCs_syn.sh .
@@ -190,7 +194,7 @@ do
       cd ..
       ######TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-"$gn
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -212,7 +216,7 @@ do
       cd ..
       ######TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-N"${pagerank_N[$i]}"-DEG"${pagerank_DEG[$i]}
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -222,7 +226,7 @@ do
       #echo "-------"
       #python3 $python_codes_path/toplev_rfile.py $benchmark_name"-INPUT-N"${pagerank_N[$i]}"-DEG"${pagerank_DEG[$i]}"-toplev-l3.txt" ../../../"CRONO-benchmarks-baseline-toplev-l3-output.txt"
       #cd ..
- 
+
 
     done
     cd ..
@@ -235,10 +239,10 @@ do
     echo "Compile sssp becnhmark ..."
     bench_dir=$benchmark_name
     mkdir $bench_dir
-    cd $bench_dir  
-    $LLVM10_buildMyPasses/bin/clang -g --std=c++0x -O3  -fdebug-info-for-profiling -Wall -Werror $benchmark_path/$benchmark_name/$benchmark_name"_outer_atomic.cc" -S -emit-llvm -o $benchmark_name".ll" 
-    $LLVM10_buildMyPasses/bin/clang -g --std=c++0x -O3  -fdebug-info-for-profiling  -Wall -Werror $benchmark_name".ll" -c
-    $LLVM10_buildMyPasses/bin/clang -g --std=c++0x -O3  -fdebug-info-for-profiling -Wall -Werror $benchmark_name".o" -o $benchmark_name -lpthread -lrt
+    cd $bench_dir
+    $LLVM10_buildMyPasses/bin/clang --target=x86_64-unknown-linux-gnu-g --std=c++0x -O3  -fdebug-info-for-profiling -Wall -Werror $benchmark_path/$benchmark_name/$benchmark_name"_outer_atomic.cc" -S -emit-llvm -o $benchmark_name".ll"
+    $LLVM10_buildMyPasses/bin/clang --target=x86_64-unknown-linux-gnu-g --std=c++0x -O3  -fdebug-info-for-profiling  -Wall -Werror $benchmark_name".ll" -c
+    $LLVM10_buildMyPasses/bin/clang --target=x86_64-unknown-linux-gnu-g --std=c++0x -O3  -fdebug-info-for-profiling -Wall -Werror $benchmark_name".o" -o $benchmark_name -lpthread -lrt
     cp $scripts_path/capture_PCs_real.sh .
     cp $scripts_path/capture_PCs_syn.sh .
     #cp $scripts_path/capture_PCs_real_prev.sh .
@@ -255,7 +259,7 @@ do
       cd ..
       #####TOP-down
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-"$gn
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -277,7 +281,7 @@ do
       cd ..
       ####TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-N"${sssp_N[$i]}"-DEG"${sssp_DEG[$i]}
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -300,9 +304,9 @@ do
     echo "Compile dfs becnhmark ..."
     bench_dir=$benchmark_name
     mkdir $bench_dir
-    cd $bench_dir  
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name".cc" -S -emit-llvm -o $benchmark_name".ll" 
-    $LLVM10_buildMyPasses/bin/clang++ -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name".cc" -o $benchmark_name -lpthread -lrt
+    cd $bench_dir
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall $benchmark_path/$benchmark_name/$benchmark_name".cc" -S -emit-llvm -o $benchmark_name".ll"
+    $LLVM10_buildMyPasses/bin/clang++ --target=x86_64-unknown-linux-gnu -gmlt -std=c++11 -O3  -fdebug-info-for-profiling -Wall  $benchmark_path/$benchmark_name/$benchmark_name".cc" -o $benchmark_name -lpthread -lrt
     cp $scripts_path/capture_PCs_real.sh .
     cp $scripts_path/capture_PCs_syn.sh .
     echo "done!"
@@ -317,7 +321,7 @@ do
       cd ..
       ######TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-"$gn
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -339,7 +343,7 @@ do
       cd ..
       ######TOP-DOWN
       #TOP_DIR="Toplev-"$benchmark_name"-INPUT-N"${dfs_N[$i]}"-DEG"${dfs_DEG[$i]}
-      #mkdir $TOP_DIR                                                                                 
+      #mkdir $TOP_DIR
       #cd $TOP_DIR
       #echo ""
       #echo ""
@@ -354,5 +358,5 @@ do
   fi
 
 done
-  
+
 

@@ -1,7 +1,5 @@
+add_library(LLVMSWP MODULE SWPrefetchingLLVMPass.cpp)
 
-add_llvm_library(SWPrefetchingLLVMPass MODULE
-  SWPrefetchingLLVMPass.cpp
-  PLUGIN_TOOL
-  opt
-  )
-add_dependencies(SWPrefetchingLLVMPass intrinsics_gen)
+target_include_directories(LLVMSWP PRIVATE ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(LLVMSWP PRIVATE ${LLVM_DEFINITIONS})
+target_compile_options(LLVMSWP PRIVATE -fno-rtti)
