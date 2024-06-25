@@ -8,12 +8,14 @@
 ### You can get the input graphs from SNAP "http://snap.stanford.edu/data/web-Google.html"
 
 ####################PATH
-benchmark_path=""
-results_path=""
-input_graphs_path=""
-python_codes_path=""
-scripts_path=""
-LLVM10_buildMyPasses=""
+benchmark_path="/home/tako/prog/pgsp/crono/apps"
+results_path="/home/tako/prog/pgsp/apt-get/results"
+input_graphs_path="/home/tako/prog/pgsp/graphs"
+python_codes_path="/home/tako/prog/pgsp/apt-get/python-codes"
+scripts_path="/home/tako/prog/pgsp/apt-get/scripts"
+LLVM10_buildMyPasses="/home/tako/prog/pgsp/llvm-10"
+pgsp_pass_path="/home/tako/prog/pgsp/apt-get"
+AutoFDO10="/home/tako/prog/pgsp/autofdo/build"
 
 ####################INPUT
 benchmarks=(bfs dfs bc pagerank sssp)

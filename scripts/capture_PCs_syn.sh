@@ -4,11 +4,14 @@ n=$2
 d=$3
 prefetch_distance=(4 8 16 32 64)
 ####################PATH
-benchmark_path=""
-results_path=""
-input_graphs_path=""
-python_codes_path=""
-LLVM10_buildMyPasses=''
+benchmark_path="/home/tako/prog/pgsp/crono/apps"
+results_path="/home/tako/prog/pgsp/apt-get/results"
+input_graphs_path="/home/tako/prog/pgsp/graphs"
+python_codes_path="/home/tako/prog/pgsp/apt-get/python-codes"
+scripts_path="/home/tako/prog/pgsp/apt-get/scripts"
+LLVM10_buildMyPasses="/home/tako/prog/pgsp/llvm-10"
+pgsp_pass_path="/home/tako/prog/pgsp/apt-get"
+AutoFDO10="/home/tako/prog/pgsp/autofdo/build"
 
 echo ""
 echo "benchmark_name:   "$benchmark_name
